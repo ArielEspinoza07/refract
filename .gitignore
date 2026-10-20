@@ -1,0 +1,24 @@
+# IDE & Editors
+/.idea
+/.vscode
+.DS_Store
+Thumbs.db
+
+# Dependencies
+/vendor
+/composer.lock
+
+# Cache & Logs
+/.phpunit.cache
+/.php-cs-fixer.cache
+/.phpunit.result.cache
+/.pest
+/.pint.cache
+*.log
+*.cache
+
+# Build artifacts
+/build
+/coverage
+/dist
+*.phar
