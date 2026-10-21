@@ -68,6 +68,18 @@ Every type can be used on its own, and offers the same entry points:
 
 `native()` always returns the underlying native object.
 
+For complete, runnable code, see the [`examples/`](examples) folder (in the repository, not the installed package):
+
+- [`router.php`](examples/router.php): builds a route table from `#[Route]` attributes on controllers, then
+  dispatches requests, passing path values to the action's parameters converted to their declared types.
+- [`container.php`](examples/container.php): a minimal dependency injection container that builds objects from their
+  constructor parameters.
+
+```bash
+php examples/router.php
+php examples/container.php
+```
+
 ### Classes
 
 ```php
