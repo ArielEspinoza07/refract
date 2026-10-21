@@ -260,9 +260,8 @@ final readonly class ReflectedParameter implements HasAttributes, Named
      */
     private static function methodFrom(string|object $class, string $method): ReflectedMethod
     {
-        $reflected = ReflectedClass::tryFrom($class) ?? throw ClassNotFound::named(is_string($class) ? $class : $class::class);
-
-        return $reflected->method($method);
+        return ReflectedMethod::tryFrom($class, $method)
+            ?? (ReflectedClass::tryFrom($class) ?? throw ClassNotFound::named(is_string($class) ? $class : $class::class))->method($method);
     }
 
     /**

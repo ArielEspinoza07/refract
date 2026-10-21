@@ -90,12 +90,20 @@ trait InteractsWithFunctions
 
     private function findParameter(string|int $parameter): ?ReflectionParameter
     {
-        $matches = array_filter(
-            $this->native()->getParameters(),
-            static fn (ReflectionParameter $native): bool => $native->getName() === $parameter || $native->getPosition() === $parameter,
-        );
+        $parameters = $this->native()->getParameters();
 
-        return $matches === [] ? null : reset($matches);
+        // The list is indexed by position, so a position needs no search.
+        if (is_int($parameter)) {
+            return $parameters[$parameter] ?? null;
+        }
+
+        foreach ($parameters as $native) {
+            if ($native->getName() === $parameter) {
+                return $native;
+            }
+        }
+
+        return null;
     }
 
     /**
