@@ -215,8 +215,11 @@ describe('declaration', function (): void {
             $message = $exception->getMessage();
         }
 
+        // PHP names the closure "Namespace\{closure}" before 8.4 and "{closure:...}" since, so only the
+        // class prefix a method would get is ruled out.
         expect($parameter->declaringClass()?->name())->toBe(Signatures::class)
-            ->and($message)->toStartWith('[{closure');
+            ->and($message)->toContain('{closure')
+            ->and($message)->not->toStartWith('['.Signatures::class.'::');
     });
 
     it('finds the declaring function or method of a parameter wrapped with fromNative()', function (): void {
