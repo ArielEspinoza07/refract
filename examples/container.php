@@ -8,9 +8,11 @@ declare(strict_types=1);
 
 use Refract\Examples\Container\Container;
 use Refract\Examples\Container\Logger;
+use Refract\Examples\Container\Mailer;
 use Refract\Examples\Container\MemoryLogger;
 use Refract\Examples\Container\Newsletter;
 use Refract\Examples\Container\Report;
+use Refract\Examples\Container\SendNewsletter;
 use Refract\Examples\Container\UnresolvableDependency;
 
 require __DIR__.'/../vendor/autoload.php';
@@ -28,4 +30,21 @@ try {
     $container->make(Report::class);
 } catch (UnresolvableDependency $exception) {
     echo 'Report: ', $exception->getMessage(), PHP_EOL;
+}
+
+echo PHP_EOL, 'Calling handlers:', PHP_EOL;
+
+$handler = new SendNewsletter();
+
+$calls = [
+    'closure' => static fn (Mailer $mailer): string => "Closure got a mailer from {$mailer->from}",
+    'invokable object' => $handler,
+    '[object, method]' => [$handler, 'handle'],
+    '[class, method]' => [SendNewsletter::class, 'handle'],
+    'first-class callable' => $handler->handle(...),
+    'static method' => SendNewsletter::class.'::preview',
+];
+
+foreach ($calls as $label => $callable) {
+    printf("  %-21s => %s\n", $label, var_export($container->call($callable), true));
 }

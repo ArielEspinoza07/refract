@@ -26,11 +26,10 @@ use Refract\Exceptions\ParameterNotFound;
 /**
  * Fluent, immutable reflection of a function or method parameter.
  *
- * The function can be given in any form PHP accepts as a callable: a Closure, a function name,
- * "Class::method", [$classOrObject, 'method'], or an invokable object.
+ * The function can be given in any form ReflectedCallable accepts: a Closure, a function name, "Class::method",
+ * [$classOrObject, 'method'], or an invokable object.
  *
- * @phpstan-type FunctionReference Closure|object|string|array{0: class-string|object, 1: string}
- * @phpstan-type UntrustedFunctionReference Closure|object|string|array<mixed>
+ * @phpstan-import-type CallableReference from ReflectedCallable
  */
 final readonly class ReflectedParameter implements HasAttributes, Named
 {
@@ -44,18 +43,18 @@ final readonly class ReflectedParameter implements HasAttributes, Named
     ) {}
 
     /**
-     * @param  FunctionReference  $function
+     * @param  CallableReference  $function
      * @param  string|int  $parameter  The parameter name, or its zero-based position.
      *
      * @throws FunctionNotFound When no function has the given name.
      * @throws ClassNotFound When the given class does not exist.
      * @throws MethodNotFound When the class has no such method.
-     * @throws InvalidFunctionReference When an array is not [class-or-object, method].
+     * @throws InvalidFunctionReference When an array is not [class-or-object, method], or a string uses self::, parent:: or static::.
      * @throws ParameterNotFound When the function has no such parameter.
      */
     public static function from(object|string|array $function, string|int $parameter): self
     {
-        return self::resolve($function)->parameter($parameter);
+        return ReflectedCallable::from($function)->parameter($parameter);
     }
 
     /**
@@ -63,12 +62,12 @@ final readonly class ReflectedParameter implements HasAttributes, Named
      *
      * Accepts any value, including malformed arrays, so it can be used directly on untrusted input.
      *
-     * @param  UntrustedFunctionReference  $function
+     * @param  object|string|array<mixed>  $function
      * @param  string|int  $parameter  The parameter name, or its zero-based position.
      */
     public static function tryFrom(object|string|array $function, string|int $parameter): ?self
     {
-        $resolved = self::tryResolve($function);
+        $resolved = ReflectedCallable::tryFrom($function);
 
         return $resolved !== null && $resolved->hasParameter($parameter) ? $resolved->parameter($parameter) : null;
     }
@@ -76,16 +75,16 @@ final readonly class ReflectedParameter implements HasAttributes, Named
     /**
      * Reflect all parameters of a function, in declaration order.
      *
-     * @param  FunctionReference  $function
+     * @param  CallableReference  $function
      *
      * @throws FunctionNotFound When no function has the given name.
      * @throws ClassNotFound When the given class does not exist.
      * @throws MethodNotFound When the class has no such method.
-     * @throws InvalidFunctionReference When an array is not [class-or-object, method].
+     * @throws InvalidFunctionReference When an array is not [class-or-object, method], or a string uses self::, parent:: or static::.
      */
     public static function collectFrom(object|string|array $function): ParameterCollection
     {
-        return self::resolve($function)->parameters();
+        return ReflectedCallable::from($function)->parameters();
     }
 
     /**
@@ -217,88 +216,6 @@ final readonly class ReflectedParameter implements HasAttributes, Named
         $prefix = $class === null || $function->isClosure() ? '' : "{$class->getName()}::";
 
         return "{$prefix}{$function->getName()}(\${$this->native->getName()})";
-    }
-
-    /**
-     * @param  UntrustedFunctionReference  $function
-     *
-     * @throws FunctionNotFound
-     * @throws ClassNotFound
-     * @throws MethodNotFound
-     * @throws InvalidFunctionReference
-     */
-    private static function resolve(object|string|array $function): FunctionLike
-    {
-        return match (true) {
-            $function instanceof Closure => ReflectedFunction::from($function),
-            is_object($function) => ReflectedMethod::from($function, '__invoke'),
-            is_array($function) => self::methodFrom(...(self::methodReference($function) ?? throw InvalidFunctionReference::malformedArray())),
-            str_contains($function, '::') => self::methodFrom(...self::splitStaticCall($function)),
-            default => ReflectedFunction::from($function),
-        };
-    }
-
-    /**
-     * @param  UntrustedFunctionReference  $function
-     */
-    private static function tryResolve(object|string|array $function): ?FunctionLike
-    {
-        return match (true) {
-            $function instanceof Closure => ReflectedFunction::from($function),
-            is_object($function) => ReflectedMethod::tryFrom($function, '__invoke'),
-            is_array($function) => self::tryMethodFromArray($function),
-            str_contains($function, '::') => ReflectedMethod::tryFrom(...self::splitStaticCall($function)),
-            default => ReflectedFunction::tryFrom($function),
-        };
-    }
-
-    /**
-     * Resolve a method from a class name that is not known to exist yet.
-     *
-     * @throws ClassNotFound
-     * @throws MethodNotFound
-     */
-    private static function methodFrom(string|object $class, string $method): ReflectedMethod
-    {
-        return ReflectedMethod::tryFrom($class, $method)
-            ?? (ReflectedClass::tryFrom($class) ?? throw ClassNotFound::named(is_string($class) ? $class : $class::class))->method($method);
-    }
-
-    /**
-     * @param  array<mixed>  $function
-     */
-    private static function tryMethodFromArray(array $function): ?ReflectedMethod
-    {
-        $reference = self::methodReference($function);
-
-        return $reference === null ? null : ReflectedMethod::tryFrom(...$reference);
-    }
-
-    /**
-     * The array as [class-or-object, method], or null when it does not have exactly that shape.
-     * Validated at runtime, because the array may come from untrusted input.
-     *
-     * @param  array<mixed>  $function
-     * @return array{0: string|object, 1: string}|null
-     */
-    private static function methodReference(array $function): ?array
-    {
-        $class = $function[0] ?? null;
-        $method = $function[1] ?? null;
-
-        return count($function) === 2 && (is_string($class) || is_object($class)) && is_string($method)
-            ? [$class, $method]
-            : null;
-    }
-
-    /**
-     * @return array{0: string, 1: string}
-     */
-    private static function splitStaticCall(string $function): array
-    {
-        [$class, $method] = explode('::', $function, 2);
-
-        return [$class, $method];
     }
 
     private function typeScope(): ?string

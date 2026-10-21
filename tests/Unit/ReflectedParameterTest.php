@@ -198,6 +198,13 @@ describe('declaration', function (): void {
             ->and($parameter->declaringClass())->toBeNull();
     });
 
+    it('reflects a parameter of a first-class callable as a parameter of the method', function (): void {
+        $parameter = ReflectedParameter::from((new Signatures())->send(...), 'to');
+
+        expect($parameter->declaringFunction())->toBeInstanceOf(ReflectedMethod::class)
+            ->and($parameter->qualifiedName())->toBe(Signatures::class.'::send($to)');
+    });
+
     it('reflects a closure as a function, not as its __invoke() method', function (): void {
         $closure = static fn (int $value): int => $value;
 

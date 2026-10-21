@@ -68,10 +68,10 @@ Every type can be used on its own, and offers the same entry points:
 
 For complete, runnable code, see the [`examples/`](examples) folder (in the repository, not the installed package):
 
-- [`router.php`](examples/router.php): builds a route table from `#[Route]` attributes on controllers, then
-  dispatches requests, passing path values to the action's parameters converted to their declared types.
+- [`router.php`](examples/router.php): builds a route table from `#[Route]` attributes on controllers, adds closure
+  routes, then dispatches requests, passing path values to the handler's parameters converted to their declared types.
 - [`container.php`](examples/container.php): a minimal dependency injection container that builds objects from their
-  constructor parameters.
+  constructor parameters, and calls any callable (closures, methods, invokable objects) with its dependencies.
 
 ```bash
 php examples/router.php
@@ -124,13 +124,21 @@ ReflectedConstant::from(Status::class, 'Active')->backingValue();   // 'active'
 ### Functions, closures and parameters
 
 ```php
+use Refract\ReflectedCallable;
 use Refract\ReflectedFunction;
 use Refract\ReflectedParameter;
 
 $function = ReflectedFunction::from(fn (int $id): User => User::find($id));
 $function->parameter('id')->type()?->name();   // 'int'
 
-// Parameters accept every callable form:
+// Any callable, as the function or method it refers to:
+ReflectedCallable::from([UserController::class, 'show']);   // ReflectedMethod
+ReflectedCallable::from($user->save(...));                   // ReflectedMethod: first-class callables are unwrapped
+ReflectedCallable::from(new SendInvoice());                  // ReflectedMethod: its __invoke()
+ReflectedCallable::from(fn (int $id) => $id);                // ReflectedFunction
+ReflectedCallable::from($handler)->parameters()->required(); // the same API for all of them (FunctionLike)
+
+// Parameters accept the same callable forms:
 ReflectedParameter::from([UserController::class, 'show'], 'id');
 ReflectedParameter::from('App\Support\format', 0);
 ReflectedParameter::collectFrom(new SendInvoice())->withAttribute(Inject::class);

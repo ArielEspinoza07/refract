@@ -22,6 +22,11 @@ final class UnresolvableDependency extends LogicException
         return new self('Cannot build ['.end($chain).']: circular dependency '.implode(' -> ', $chain).'.');
     }
 
+    public static function notCallable(string $function): self
+    {
+        return new self("Cannot call [{$function}].");
+    }
+
     public static function wrongBinding(string $abstract, string $concrete): self
     {
         return new self("Cannot build [{$abstract}]: it is bound to [{$concrete}], which does not extend or implement it.");

@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Refract\Concerns\PreventsSerialization;
 use Refract\Contracts\Named;
 use Refract\Exceptions\RefractException;
+use Refract\ReflectedCallable;
 
 it('makes every exception catchable as a RefractException', function (): void {
     $files = glob(dirname(__DIR__, 2).'/src/Exceptions/*.php') ?: [];
@@ -21,20 +22,31 @@ it('makes every exception catchable as a RefractException', function (): void {
     }
 });
 
+/**
+ * Every Reflected* class that has instances. ReflectedCallable only creates other reflections.
+ *
+ * @return list<string>
+ */
+function reflectionClasses(): array
+{
+    $classes = array_map(
+        static fn (string $file): string => 'Refract\\'.basename($file, '.php'),
+        glob(dirname(__DIR__, 2).'/src/Reflected*.php') ?: [],
+    );
+
+    return array_values(array_filter($classes, static fn (string $class): bool => $class !== ReflectedCallable::class));
+}
+
 it('makes every reflection Named, so collections can list and key it by name', function (): void {
-    $files = glob(dirname(__DIR__, 2).'/src/Reflected*.php') ?: [];
+    expect(reflectionClasses())->not->toBeEmpty();
 
-    expect($files)->not->toBeEmpty();
-
-    foreach ($files as $file) {
-        expect(class_implements('Refract\\'.basename($file, '.php')))->toHaveKey(Named::class);
+    foreach (reflectionClasses() as $class) {
+        expect(class_implements($class))->toHaveKey(Named::class);
     }
 });
 
 it('makes every reflection refuse serialization with a clear error', function (): void {
-    $files = glob(dirname(__DIR__, 2).'/src/Reflected*.php') ?: [];
-
-    foreach ($files as $file) {
-        expect(class_uses('Refract\\'.basename($file, '.php')))->toHaveKey(PreventsSerialization::class);
+    foreach (reflectionClasses() as $class) {
+        expect(class_uses($class))->toHaveKey(PreventsSerialization::class);
     }
 });

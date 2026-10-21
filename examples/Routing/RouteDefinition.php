@@ -4,19 +4,21 @@ declare(strict_types=1);
 
 namespace Refract\Examples\Routing;
 
+use Closure;
+use Refract\ReflectedCallable;
+
 /**
- * One route: which controller method handles a verb and path.
+ * One route: which handler answers a verb and path. The handler is a controller method or a closure.
  */
 final readonly class RouteDefinition
 {
     /**
-     * @param  class-string  $controller
+     * @param  Closure|array{0: class-string, 1: string}  $handler
      */
     public function __construct(
         public HttpMethod $verb,
         public string $path,
-        public string $controller,
-        public string $action,
+        public Closure|array $handler,
     ) {}
 
     /**
@@ -38,5 +40,13 @@ final readonly class RouteDefinition
     public function signature(): string
     {
         return "{$this->verb->value} {$this->path}";
+    }
+
+    /**
+     * The handler's full name, e.g. "App\UserController::show()", or the name PHP gives a closure.
+     */
+    public function handlerName(): string
+    {
+        return ReflectedCallable::from($this->handler)->qualifiedName();
     }
 }

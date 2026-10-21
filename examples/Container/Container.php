@@ -4,16 +4,23 @@ declare(strict_types=1);
 
 namespace Refract\Examples\Container;
 
+use Closure;
+use Refract\ReflectedCallable;
 use Refract\ReflectedClass;
+use Refract\ReflectedFunction;
+use Refract\ReflectedMethod;
 use Refract\ReflectedParameter;
 
 /**
- * A minimal dependency injection container: it builds objects by reading their constructor.
+ * A minimal dependency injection container: it builds objects by reading their constructor, and calls any
+ * callable by reading its parameters.
  *
- * Each constructor parameter is resolved, in order, from:
+ * Each parameter is resolved, in order, from:
  * 1. its class type, built recursively (interfaces through bind());
  * 2. its default value;
  * 3. null, when its type allows it.
+ *
+ * @phpstan-import-type CallableReference from ReflectedCallable
  */
 final class Container
 {
@@ -75,6 +82,29 @@ final class Container
     }
 
     /**
+     * Calls any callable, resolving its parameters the same way as constructor parameters.
+     *
+     * A method given by class name, as [Handler::class, 'method'] or "Handler::method", is called on an
+     * instance built by the container, unless it is static.
+     *
+     * @param  CallableReference  $callable
+     *
+     * @throws UnresolvableDependency
+     */
+    public function call(object|string|array $callable): mixed
+    {
+        $function = ReflectedCallable::from($callable);
+        $arguments = $function->parameters()->map($this->resolve(...));
+
+        return match (true) {
+            $callable instanceof Closure => $callable(...$arguments),
+            $function instanceof ReflectedFunction => $function->invoke(...$arguments),
+            $function instanceof ReflectedMethod => $function->invoke($function->isStatic() ? null : $this->instanceFor($callable), ...$arguments),
+            default => throw UnresolvableDependency::notCallable($function->qualifiedName()),
+        };
+    }
+
+    /**
      * @throws UnresolvableDependency
      */
     private function resolve(ReflectedParameter $parameter): mixed
@@ -90,6 +120,26 @@ final class Container
             $parameter->allowsNull() => null,
             default => throw UnresolvableDependency::parameter($parameter),
         };
+    }
+
+    /**
+     * The object to call a method on: the one given, or one built from the class name.
+     *
+     * @param  object|string|array{0: class-string|object, 1: string}  $callable
+     *
+     * @throws UnresolvableDependency
+     */
+    private function instanceFor(object|string|array $callable): object
+    {
+        if (is_object($callable)) {
+            return $callable;
+        }
+
+        $class = is_array($callable) ? $callable[0] : explode('::', $callable, 2)[0];
+
+        return is_object($class)
+            ? $class
+            : $this->make((ReflectedClass::tryFrom($class) ?? throw UnresolvableDependency::notInstantiable($class))->name());
     }
 
     /**

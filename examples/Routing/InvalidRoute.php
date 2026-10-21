@@ -10,10 +10,7 @@ final class InvalidRoute extends LogicException
 {
     public static function duplicate(RouteDefinition $route, RouteDefinition $existing): self
     {
-        return new self(
-            "[{$route->signature()}] is declared by both {$existing->controller}::{$existing->action}() "
-            ."and {$route->controller}::{$route->action}().",
-        );
+        return new self("[{$route->signature()}] is declared by both {$existing->handlerName()} and {$route->handlerName()}.");
     }
 
     public static function missingValue(string $parameter): self
