@@ -19,8 +19,8 @@ A fluent, immutable and fully typed API for PHP's native reflection: classes, en
 properties, parameters, attributes and types.
 
 > [!WARNING]
-> Refract is in early development. There is no tagged release yet and the public API is still being designed.
-> Expect breaking changes until `1.0.0`.
+> Refract is in early development. Until `1.0.0`, minor releases may contain breaking changes; each one is listed
+> in the [CHANGELOG](CHANGELOG.md).
 
 ## Why Refract
 
@@ -48,8 +48,6 @@ Refract is framework-agnostic and has no runtime dependencies.
 > **[PHP 8.3+](https://php.net/releases/)**
 
 ## Installation
-
-Refract is not published on Packagist yet. Once it is:
 
 ```bash
 composer require arielespinoza07/refract
