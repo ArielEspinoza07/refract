@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `ReflectedCallable::from()` and `tryFrom()` reflect any callable as the `ReflectedFunction` or `ReflectedMethod` it
+  refers to: a closure, a function name, `"Class::method"`, `[$classOrObject, 'method']` or an invokable object.
+  First-class callables such as `$user->save(...)` resolve to the method they were created from.
+
+### Changed
+
+- `ReflectedParameter::from()`, `tryFrom()` and `collectFrom()` resolve callables through `ReflectedCallable`, so a
+  parameter of a first-class callable now belongs to its `ReflectedMethod` instead of a `ReflectedFunction`.
+- Callable strings using `self::`, `parent::` or `static::` are rejected with `InvalidFunctionReference`.
+- Faster `hasAttribute()`, `withAttribute()` and method and parameter lookups.
+
 ## [0.1.0] - 2026-10-21
 
 First release: a fluent, immutable and fully typed API for PHP's native reflection. Requires PHP 8.3 or later and has
