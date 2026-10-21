@@ -1,8 +1,19 @@
 parameters:
     level: max
 
+    # Analyse against every supported PHP version, regardless of the PHP running PHPStan.
+    # Features newer than 8.3 must be guarded with method_exists().
+    phpVersion:
+        min: 80300
+        max: 80599
+
     paths:
         - src
         - tests
+
+    excludePaths:
+        # Uses PHP 8.4 syntax. Still scanned, so tests can reference its classes.
+        analyse:
+            - tests/Fixtures/Php84
 
     reportUnmatchedIgnoredErrors: true

@@ -1,5 +1,8 @@
 {
   "preset": "psr12",
+  "exclude": [
+    "tests/Fixtures/Php84"
+  ],
   "rules": {
     "array_push": true,
     "backtick_to_shell_exec": true,
@@ -7,8 +10,11 @@
     "declare_strict_types": true,
     "lowercase_keywords": true,
     "lowercase_static_reference": true,
-    "final_class": true,
-    "final_internal_class": true,
+    "final_internal_class": {
+      "include": [],
+      "exclude": ["extensible"],
+      "consider_absent_docblock_as_internal_class": true
+    },
     "final_public_method_for_abstract_class": true,
     "fully_qualified_strict_types": true,
     "global_namespace_import": {

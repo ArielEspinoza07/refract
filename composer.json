@@ -1,7 +1,17 @@
 {
     "name": "arielespinoza07/refract",
-    "description": "wrapper for native php reflection with fluent api",
+    "description": "A fluent, immutable and fully typed API for PHP's native reflection: classes, enums, methods, functions, properties, parameters, attributes and types.",
     "type": "library",
+    "keywords": [
+        "reflection",
+        "introspection",
+        "attributes",
+        "types",
+        "fluent",
+        "immutable",
+        "php-reflection"
+    ],
+    "homepage": "https://github.com/ArielEspinoza07/refract",
     "license": "MIT",
     "authors": [
         {
@@ -9,13 +19,19 @@
             "email": "arielespinoza46@gmail.com"
         }
     ],
+    "support": {
+        "issues": "https://github.com/ArielEspinoza07/refract/issues",
+        "source": "https://github.com/ArielEspinoza07/refract",
+        "security": "https://github.com/ArielEspinoza07/refract/security/policy"
+    },
     "require": {
         "php": "^8.3"
     },
     "require-dev": {
         "pestphp/pest": "^4.7.8",
         "phpstan/phpstan": "^2.3.1",
-        "laravel/pint": "^1.32.1"
+        "laravel/pint": "^1.32.1",
+        "pestphp/pest-plugin-type-coverage": "^4.0"
     },
     "autoload": {
         "psr-4": {
@@ -25,17 +41,22 @@
     "autoload-dev": {
         "psr-4": {
             "Refract\\Tests\\": "tests/"
-        }
+        },
+        "files": [
+            "tests/Fixtures/functions.php"
+        ]
     },
     "scripts": {
         "lint": "pint --test",
         "lint:fix": "pint",
         "analyse": "phpstan analyse",
         "test": "pest",
-        "test:coverage": "pest --type-coverage --min=100",
+        "test:coverage": "pest --coverage --min=100",
+        "test:types": "pest --type-coverage --min=100",
         "check": [
             "@lint",
             "@analyse",
+            "@test:types",
             "@test"
         ]
     },
