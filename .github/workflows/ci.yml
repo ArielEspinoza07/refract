@@ -58,6 +58,39 @@ jobs:
       - name: Line coverage
         run: composer test:coverage
 
+  # Checks that the tests catch deliberate bugs, not only that they run every line.
+  # Informational: it is not a required check, so a slow or flaky run never blocks a merge.
+  mutation:
+    name: Mutation testing
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          coverage: pcov
+
+      - name: Get Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: mutation-php-8.5-${{ hashFiles('composer.json') }}
+          restore-keys: mutation-php-8.5-
+
+      - name: Install dependencies
+        run: composer update --prefer-stable --no-interaction --prefer-dist
+
+      - name: Mutation testing
+        run: composer test:mutate
+
   tests:
     name: Tests (PHP ${{ matrix.php }}, ${{ matrix.dependencies }})
     runs-on: ubuntu-latest

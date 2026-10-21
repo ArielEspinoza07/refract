@@ -53,6 +53,7 @@
         "test": "pest",
         "test:coverage": "pest --coverage --min=100",
         "test:types": "pest --type-coverage --min=100",
+        "test:mutate": "pest --mutate --everything --parallel --path=src --min=95",
         "check": [
             "@lint",
             "@analyse",

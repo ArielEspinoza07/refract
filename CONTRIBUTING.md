@@ -33,6 +33,7 @@ Every PR must pass the same checks CI runs:
 | `composer test`         | Runs the Pest test suite                        |
 | `composer test:types`   | Enforces 100% type coverage                     |
 | `composer test:coverage`| Enforces 100% line coverage (needs Xdebug or PCOV; with Xdebug, set `XDEBUG_MODE=coverage`) |
+| `composer test:mutate`  | Runs mutation testing and enforces a 95% score (needs Xdebug or PCOV; takes a few minutes) |
 | `composer check`        | Runs lint, analyse, type coverage, and test in sequence |
 
 Run `composer check` before pushing. CI also runs the test suite on PHP 8.3, 8.4, and 8.5 with both lowest and
