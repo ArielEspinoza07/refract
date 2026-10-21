@@ -36,12 +36,29 @@ Please include:
 
 ## Scope
 
-Refract wraps PHP's native reflection API and does not execute code on its own. Issues in scope include, for
-example:
+Refract wraps PHP's native reflection API. Most of its API only inspects declarations. The members below are the
+exceptions: they run code or read private state **by design**, only when you call them, and are documented as such.
 
-- Refract invoking methods, constructors, or property hooks, or reading private state, when the API contract says
-  it only inspects.
-- Refract bypassing visibility or `readonly` guarantees in ways that are not explicitly documented and opted into.
+| Member | What it does beyond inspecting |
+|---|---|
+| `ReflectedClass::newInstance()` | Runs the constructor |
+| `ReflectedClass::newInstanceWithoutConstructor()` | Creates an object without its constructor; its destructor still runs later |
+| `ReflectedClass::newLazyGhost()`, `newLazyProxy()` | Run the given initializer or factory on first access to the object |
+| `ReflectedClass::staticPropertyValue()` | Reads a static property, regardless of visibility |
+| `ReflectedMethod::invoke()`, `closure()` | Call the method, or return it as a callable, regardless of visibility |
+| `ReflectedFunction::invoke()`, `closure()` | Call the function, or return it as a callable |
+| `ReflectedProperty::value()` | Reads the property regardless of visibility; on PHP 8.4, this runs its `get` hook |
+| `ReflectedAttribute::newInstance()` | Runs the attribute's constructor |
+| `ReflectedAttribute::arguments()`, `ReflectedParameter::defaultValue()` | Evaluate the declared expressions, which can contain `new` (PHP 8.1+) and so run constructors |
+
+Looking up a class by name, through `from()`, `tryFrom()`, `isSubclassOf()` or `implements()`, triggers autoloading,
+which loads that class's file.
+
+Issues in scope include, for example:
+
+- Any member not listed above running code or reading private state.
+- Refract bypassing visibility or `readonly` guarantees in ways that are not documented above.
+- `tryFrom()` throwing, emitting warnings, or crashing on malformed input instead of returning `null`.
 - Denial of service through unbounded recursion or memory use when inspecting crafted classes or types.
 
 Out of scope:
@@ -49,5 +66,7 @@ Out of scope:
 - Vulnerabilities in PHP itself or in its native `Reflection*` classes. Report those to the
   [PHP project](https://github.com/php/php-src/security).
 - Vulnerabilities in development dependencies (Pest, PHPStan, Pint) that do not affect the published package.
-- Applications that pass untrusted input as class, method, or property names into Refract. Validating that input is
-  the application's responsibility.
+- Applications that let untrusted input choose which classes, methods or properties to reflect. `tryFrom()` handles
+  such input safely, returning `null` instead of failing, but loading an attacker-chosen class still runs the
+  autoloader, and the members listed above run code. Restricting names to a known set is the application's
+  responsibility.

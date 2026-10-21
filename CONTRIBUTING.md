@@ -31,11 +31,24 @@ Every PR must pass the same checks CI runs:
 | `composer lint:fix`     | Fixes code style with Pint                      |
 | `composer analyse`      | Runs PHPStan at level `max` on `src` and `tests` |
 | `composer test`         | Runs the Pest test suite                        |
-| `composer test:coverage`| Enforces 100% type coverage                     |
-| `composer check`        | Runs lint, analyse, and test in sequence        |
+| `composer test:types`   | Enforces 100% type coverage                     |
+| `composer test:coverage`| Enforces 100% line coverage (needs Xdebug or PCOV; with Xdebug, set `XDEBUG_MODE=coverage`) |
+| `composer check`        | Runs lint, analyse, type coverage, and test in sequence |
 
 Run `composer check` before pushing. CI also runs the test suite on PHP 8.3, 8.4, and 8.5 with both lowest and
 stable dependencies, so avoid language features or functions that don't exist on 8.3.
+
+### Supporting features newer than PHP 8.3
+
+PHPStan analyses against PHP 8.3 to 8.5 (see `phpVersion` in `phpstan.neon`), whichever PHP runs it.
+
+- Guard every call to a newer native method with `method_exists()`, written as one expression with its
+  fallback, e.g. `method_exists($this->native, 'isVirtual') && $this->native->isVirtual() === true`. This keeps
+  PHPStan happy on every version and keeps line coverage meaningful.
+- Methods that only inspect return a safe value on older versions (`false`, an empty collection). Methods
+  that create something throw `FeatureNotSupported`.
+- Fixtures using newer syntax go in `tests/Fixtures/Php84`, which PHPStan and Pint skip. Reference them by
+  class name string in tests, and skip those tests on older versions with `->skip(PHP_VERSION_ID < 80400, ...)`.
 
 ## Coding standards
 
