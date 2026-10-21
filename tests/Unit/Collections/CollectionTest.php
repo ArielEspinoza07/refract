@@ -68,6 +68,15 @@ describe('first() and last()', function (): void {
             ->and(constants()->last($isPublic)?->name())->toBe('FORMAT');
     });
 
+    it('finds a match at either end of the collection', function (): void {
+        $isType = static fn (ReflectedConstant $constant): bool => $constant->name() === 'TYPE';
+        $isProtected = static fn (ReflectedConstant $constant): bool => $constant->isProtected();
+
+        expect(constants()->last($isType)?->name())->toBe('TYPE')
+            ->and(constants()->last($isProtected)?->name())->toBe('LIMIT')
+            ->and(constants()->first($isProtected)?->name())->toBe('LIMIT');
+    });
+
     it('returns null when no item is accepted', function (): void {
         $isPrivate = static fn (ReflectedConstant $constant): bool => $constant->isPrivate();
 

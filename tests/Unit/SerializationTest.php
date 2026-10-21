@@ -29,9 +29,11 @@ dataset('reflections', [
 
 it('refuses to be serialized, naming the Refract class and the fix', function (object $reflection): void {
     expect(static fn (): string => serialize($reflection))
-        ->toThrow(NotSerializable::class, '['.$reflection::class.'] cannot be serialized')
-        ->and(static fn (): string => serialize($reflection))
-        ->toThrow(NotSerializable::class, 'call from() again');
+        ->toThrow(
+            NotSerializable::class,
+            '['.$reflection::class.'] cannot be serialized, because it wraps a native reflection. '
+            .'Store the name you reflected, and call from() again when you need the reflection.',
+        );
 })->with('reflections');
 
 it('refuses to be unserialized from a crafted string', function (string $class): void {

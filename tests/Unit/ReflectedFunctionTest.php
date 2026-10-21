@@ -64,6 +64,14 @@ describe('closures', function (): void {
             ->and($named->isClosure())->toBeFalse();
     });
 
+    it('resolves a static return type against the closure scope', function (): void {
+        $signatures = new Signatures();
+        $returnType = ReflectedFunction::from($signatures->staticReturningClosure())->returnType();
+
+        expect($returnType?->allows($signatures))->toBeTrue()
+            ->and($returnType?->classNames())->toBe([Signatures::class]);
+    });
+
     it('exposes what a closure is bound and scoped to', function (): void {
         $signatures = new Signatures(7);
         $closure = ReflectedFunction::from($signatures->boundClosure());
