@@ -46,7 +46,7 @@ trait InteractsWithFunctions
      */
     public function parameter(string|int $parameter): ReflectedParameter
     {
-        $native = $this->findParameter($parameter) ?? throw ParameterNotFound::in($this->declarationName(), $parameter);
+        $native = $this->findParameter($parameter) ?? throw ParameterNotFound::in($this->qualifiedName(), $parameter);
 
         return ReflectedParameter::ofFunction($native, $this);
     }
@@ -83,6 +83,11 @@ trait InteractsWithFunctions
         return $this->native()->isDeprecated();
     }
 
+    /**
+     * The fully qualified name of the declaration, also used in error messages.
+     */
+    abstract public function qualifiedName(): string;
+
     private function findParameter(string|int $parameter): ?ReflectionParameter
     {
         $matches = array_filter(
@@ -99,9 +104,4 @@ trait InteractsWithFunctions
      * @return class-string|null
      */
     abstract private function typeScope(): ?string;
-
-    /**
-     * How the declaration is named in error messages, e.g. "App\User::save()" or "strlen()".
-     */
-    abstract private function declarationName(): string;
 }

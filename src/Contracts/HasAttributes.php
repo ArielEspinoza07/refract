@@ -6,6 +6,7 @@ namespace Refract\Contracts;
 
 use Refract\Collections\Collection;
 use Refract\Exceptions\AttributeNotFound;
+use Refract\Exceptions\AttributeNotInstantiable;
 use Refract\ReflectedAttribute;
 
 /**
@@ -44,4 +45,17 @@ interface HasAttributes
      * @throws AttributeNotFound When the declaration does not have the attribute.
      */
     public function attribute(string $attribute): ReflectedAttribute;
+
+    /**
+     * The attribute objects of the given type, or of types that extend it, in declaration order;
+     * an empty list when there are none. Shorthand for calling newInstance() on each of attributes().
+     *
+     * @template TAttribute of object
+     *
+     * @param  class-string<TAttribute>  $attribute
+     * @return list<TAttribute>
+     *
+     * @throws AttributeNotInstantiable When PHP refuses to create one of the attributes.
+     */
+    public function attributeInstances(string $attribute): array;
 }

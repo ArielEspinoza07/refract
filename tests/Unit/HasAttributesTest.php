@@ -11,8 +11,10 @@ use Refract\ReflectedConstant;
 use Refract\ReflectedMethod;
 use Refract\ReflectedProperty;
 use Refract\Tests\Fixtures\Article;
+use Refract\Tests\Fixtures\Label;
 use Refract\Tests\Fixtures\Table;
 use Refract\Tests\Fixtures\Tag;
+use Refract\Tests\Fixtures\User;
 
 // Every member below carries #[Tag] and not #[Table]. Class-level attributes are
 // covered in ReflectedClassTest; they share the same implementation.
@@ -55,3 +57,21 @@ it('names the declaration when the attribute is missing', function (HasAttribute
     expect(static fn (): ReflectedAttribute => $member->attribute(Table::class))
         ->toThrow(AttributeNotFound::class, "Attribute [".Table::class."] is not declared on [{$target}].");
 })->with('tagged members');
+
+it('creates the attribute objects of the given type', function (HasAttributes $member): void {
+    $instances = $member->attributeInstances(Tag::class);
+
+    expect($instances)->toHaveCount(1)
+        ->and($instances[0])->toBeInstanceOf(Tag::class)
+        ->and($member->attributeInstances(Table::class))->toBe([]);
+})->with('tagged members');
+
+it('creates one object per declaration of a repeated attribute, in order', function (): void {
+    $labels = ReflectedMethod::from(Article::class, 'render')->attributeInstances(Label::class);
+
+    expect(array_map(static fn (Label $label): string => $label->value, $labels))->toBe(['first', 'second']);
+});
+
+it('creates class attribute objects with their arguments', function (): void {
+    expect(ReflectedClass::from(User::class)->attributeInstances(Table::class)[0]->name)->toBe('users');
+});

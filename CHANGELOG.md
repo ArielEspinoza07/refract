@@ -55,6 +55,8 @@ no runtime dependencies.
   - `value()`, `backingValue()`, `type()` (typed constants), `isFinal()`, `isEnumCase()`, `docComment()`
 - Shared by methods, properties and constants (`ClassMember`)
   - `isPublic()`, `isProtected()`, `isPrivate()`, `declaringClass()`, `isDeclaredBy()`
+- `qualifiedName()` on classes, enums, methods, properties, constants, functions and parameters, such as
+  `App\User::save()`, `App\User::$email` or `App\User::save($data)`
 - `ReflectedParameter`
   - accepts every callable form: a closure, a function name, `"Class::method"`, `[$classOrObject, 'method']`, or an
     invokable object
@@ -71,9 +73,10 @@ no runtime dependencies.
   - `newInstance()`, typed as the attribute class
 - Attributes on classes, enums, methods, functions, properties, constants and parameters (`HasAttributes`)
   - `attributes()`, optionally filtered by type, plus `attribute()` and `hasAttribute()`
+  - `attributeInstances()`: the attribute objects of a type, created and typed
   - Subclasses of the requested attribute are matched.
 - `ReflectedType` for named, union, intersection and DNF types
-  - `kind()`, `name()`, `allowsNull()`, `isBuiltin()`
+  - `kind()`, `name()`, `nonNullName()`, `allowsNull()`, `isBuiltin()`
   - `types()`: the members of a union or intersection
   - `allows($value)`: checks a value the way PHP does with `strict_types=1`
   - `classNames()`: the classes a type accepts, with DNF types flattened and `self`, `static` and `parent` resolved

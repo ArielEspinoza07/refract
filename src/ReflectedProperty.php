@@ -134,7 +134,7 @@ final readonly class ReflectedProperty implements ClassMember
     {
         return $this->native->hasDefaultValue()
             ? $this->native->getDefaultValue()
-            : throw DefaultValueNotAvailable::for($this->declarationName());
+            : throw DefaultValueNotAvailable::for($this->qualifiedName());
     }
 
     /**
@@ -227,7 +227,15 @@ final readonly class ReflectedProperty implements ClassMember
      */
     public function hook(PropertyHook $hook): ReflectedMethod
     {
-        return ReflectedMethod::fromNative($this->nativeHooks()[$hook->value] ?? throw PropertyHookNotFound::on($this->declarationName(), $hook));
+        return ReflectedMethod::fromNative($this->nativeHooks()[$hook->value] ?? throw PropertyHookNotFound::on($this->qualifiedName(), $hook));
+    }
+
+    /**
+     * The fully qualified name of the declaration, e.g. "App\Models\User::$email".
+     */
+    public function qualifiedName(): string
+    {
+        return "{$this->native->class}::\${$this->native->getName()}";
     }
 
     /**
@@ -242,16 +250,11 @@ final readonly class ReflectedProperty implements ClassMember
 
     private function instanceFor(?object $object): ?object
     {
-        return $object ?? ($this->native->isStatic() ? null : throw InstanceRequired::forProperty($this->declarationName()));
+        return $object ?? ($this->native->isStatic() ? null : throw InstanceRequired::forProperty($this->qualifiedName()));
     }
 
     private function typeScope(): string
     {
         return $this->native->class;
-    }
-
-    private function declarationName(): string
-    {
-        return "{$this->native->class}::\${$this->native->getName()}";
     }
 }

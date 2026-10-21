@@ -501,15 +501,18 @@ final readonly class ReflectedClass implements HasAttributes, Named
     }
 
     /**
+     * The fully qualified name of the declaration, the same as name(), e.g. "App\Models\User".
+     */
+    public function qualifiedName(): string
+    {
+        return $this->name();
+    }
+
+    /**
      * @return T
      */
     private function asInstance(mixed $value): object
     {
         return is_object($value) && $this->isInstance($value) ? $value : throw new LogicException('PHP returned an instance of another class.');
-    }
-
-    private function declarationName(): string
-    {
-        return $this->name();
     }
 }

@@ -196,3 +196,20 @@ describe('classNames()', function (): void {
         ReflectedType::fromNative($type)->classNames();
     })->with(['static', 'selfReturn', 'parentReturn'])->throws(TypeNotResolvable::class);
 });
+
+describe('nonNullName()', function (): void {
+    it('prints the type without the part that allows null', function (string $property, string $expected): void {
+        expect(sampleType($property)->nonNullName())->toBe($expected);
+    })->with([
+        'named type' => ['int', 'int'],
+        'nullable built-in type' => ['nullable', 'string'],
+        'nullable class' => ['nullableClass', Model::class],
+        'mixed, which cannot be split' => ['mixed', 'mixed'],
+        'null on its own' => ['null', 'null'],
+        'union without null, in the order PHP reports' => ['union', 'string|int'],
+        'union with null' => ['unionWithNull', 'string|int'],
+        'intersection' => ['intersection', 'Countable&Traversable'],
+        'DNF with only an intersection left' => ['dnf', 'Countable&Traversable'],
+        'DNF with an intersection and a class left' => ['dnfWithClass', '(Countable&Traversable)|'.Model::class],
+    ]);
+});

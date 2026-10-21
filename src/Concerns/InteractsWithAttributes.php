@@ -8,6 +8,7 @@ use ReflectionAttribute;
 use Refract\Collections\Collection;
 use Refract\Contracts\HasAttributes;
 use Refract\Exceptions\AttributeNotFound;
+use Refract\Exceptions\AttributeNotInstantiable;
 use Refract\ReflectedAttribute;
 
 /**
@@ -54,11 +55,30 @@ trait InteractsWithAttributes
     public function attribute(string $attribute): ReflectedAttribute
     {
         return $this->attributes($attribute)->first()
-            ?? throw AttributeNotFound::on($this->declarationName(), $attribute);
+            ?? throw AttributeNotFound::on($this->qualifiedName(), $attribute);
     }
 
     /**
-     * How the declaration is named in error messages, e.g. "App\User" or "App\User::save()".
+     * @template TAttribute of object
+     *
+     * @param  class-string<TAttribute>  $attribute
+     * @return list<TAttribute>
+     *
+     * @throws AttributeNotInstantiable
      */
-    abstract private function declarationName(): string;
+    public function attributeInstances(string $attribute): array
+    {
+        $instances = [];
+
+        foreach ($this->attributes($attribute) as $reflected) {
+            $instances[] = $reflected->newInstance();
+        }
+
+        return $instances;
+    }
+
+    /**
+     * The fully qualified name of the declaration, also used in error messages.
+     */
+    abstract public function qualifiedName(): string;
 }

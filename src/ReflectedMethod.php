@@ -131,7 +131,7 @@ final readonly class ReflectedMethod implements ClassMember, FunctionLike
         try {
             return $this->native->invokeArgs($this->instanceFor($object), $arguments);
         } catch (ReflectionException $exception) {
-            throw MethodNotInvocable::because($this->declarationName(), $exception);
+            throw MethodNotInvocable::because($this->qualifiedName(), $exception);
         }
     }
 
@@ -145,18 +145,21 @@ final readonly class ReflectedMethod implements ClassMember, FunctionLike
         return $this->native->getClosure($this->instanceFor($object));
     }
 
+    /**
+     * The fully qualified name of the declaration, e.g. "App\Models\User::save()".
+     */
+    public function qualifiedName(): string
+    {
+        return "{$this->native->class}::{$this->native->getName()}()";
+    }
+
     private function instanceFor(?object $object): ?object
     {
-        return $object ?? ($this->native->isStatic() ? null : throw InstanceRequired::forMethod($this->declarationName()));
+        return $object ?? ($this->native->isStatic() ? null : throw InstanceRequired::forMethod($this->qualifiedName()));
     }
 
     private function typeScope(): string
     {
         return $this->native->class;
-    }
-
-    private function declarationName(): string
-    {
-        return "{$this->native->class}::{$this->native->getName()}()";
     }
 }
