@@ -17,8 +17,6 @@ final class RouteScanner
     /**
      * @param  class-string  ...$controllers
      * @return list<RouteDefinition>
-     *
-     * @throws InvalidRoute When two routes have the same verb and path.
      */
     public function scan(string ...$controllers): array
     {
@@ -30,15 +28,11 @@ final class RouteScanner
             // Only public methods can handle requests; a #[Route] on any other method is ignored.
             foreach (ReflectedMethod::collectFrom($controller)->public()->withAttribute(Route::class) as $method) {
                 foreach ($method->attributeInstances(Route::class) as $route) {
-                    $definition = new RouteDefinition($route->verb, $prefix.$route->path, $controller, $method->name());
-
-                    $routes[$definition->signature()] = isset($routes[$definition->signature()])
-                        ? throw InvalidRoute::duplicate($definition, $routes[$definition->signature()])
-                        : $definition;
+                    $routes[] = new RouteDefinition($route->verb, $prefix.$route->path, [$controller, $method->name()]);
                 }
             }
         }
 
-        return array_values($routes);
+        return $routes;
     }
 }

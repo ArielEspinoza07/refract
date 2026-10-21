@@ -9,6 +9,7 @@ use Refract\Examples\Container\Mailer;
 use Refract\Examples\Container\MemoryLogger;
 use Refract\Examples\Container\Newsletter;
 use Refract\Examples\Container\Report;
+use Refract\Examples\Container\SendNewsletter;
 use Refract\Examples\Container\UnresolvableDependency;
 
 function container(): Container
@@ -65,4 +66,45 @@ it('can build again after a failed attempt', function (): void {
 
     expect(static fn (): Report => $container->make(Report::class))->toThrow(UnresolvableDependency::class)
         ->and($container->make(Mailer::class))->toBeInstanceOf(Mailer::class);
+});
+
+describe('call()', function (): void {
+    it('calls a closure with its dependencies and default values resolved', function (): void {
+        $result = container()->call(static fn (Mailer $mailer, string $subject = 'Hello'): string => "{$subject} from {$mailer->from}");
+
+        expect($result)->toBe('Hello from noreply@example.com');
+    });
+
+    it('calls an invokable object', function (): void {
+        expect(container()->call(new SendNewsletter()))->toBe('Newsletter sent from noreply@example.com');
+    });
+
+    it('calls a method on the given object', function (): void {
+        expect(container()->call([new SendNewsletter(), 'handle']))->toBe('1 copies sent from noreply@example.com');
+    });
+
+    it('calls a method on an instance it builds from the class name', function (mixed $callable): void {
+        /** @var array{0: class-string, 1: string}|string $callable */
+        expect(container()->call($callable))->toBe('1 copies sent from noreply@example.com');
+    })->with([
+        'class and method' => [[SendNewsletter::class, 'handle']],
+        'static call string' => [SendNewsletter::class.'::handle'],
+    ]);
+
+    it('calls a static method without an instance', function (): void {
+        expect(container()->call([SendNewsletter::class, 'preview']))->toBe('Preview logged')
+            ->and(container()->call(SendNewsletter::class.'::preview'))->toBe('Preview logged');
+    });
+
+    it('calls a first-class callable on the object it was created from', function (): void {
+        expect(container()->call((new SendNewsletter())->handle(...)))->toBe('1 copies sent from noreply@example.com');
+    });
+
+    it('calls a function by name', function (): void {
+        expect(container()->call('Refract\Tests\Fixtures\counter'))->toBe(0);
+    });
+
+    it('explains which parameter of the callable cannot be resolved', function (): void {
+        container()->call('strlen');
+    })->throws(UnresolvableDependency::class, 'Cannot resolve [strlen($string)]');
 });
