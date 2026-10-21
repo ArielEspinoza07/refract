@@ -61,9 +61,9 @@ final readonly class Router
         $type = $parameter->type();
 
         // Path values are strings; convert them to what the parameter declares, then let the type confirm it.
-        $converted = match ($type?->name()) {
-            'int', '?int' => filter_var($value, FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE),
-            'float', '?float' => filter_var($value, FILTER_VALIDATE_FLOAT, FILTER_NULL_ON_FAILURE),
+        $converted = match ($type?->nonNullName()) {
+            'int' => filter_var($value, FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE),
+            'float' => filter_var($value, FILTER_VALIDATE_FLOAT, FILTER_NULL_ON_FAILURE),
             default => $value,
         };
 

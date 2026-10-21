@@ -29,8 +29,7 @@ final class RouteScanner
 
             // Only public methods can handle requests; a #[Route] on any other method is ignored.
             foreach (ReflectedMethod::collectFrom($controller)->public()->withAttribute(Route::class) as $method) {
-                foreach ($method->attributes(Route::class) as $attribute) {
-                    $route = $attribute->newInstance();
+                foreach ($method->attributeInstances(Route::class) as $route) {
                     $definition = new RouteDefinition($route->verb, $prefix.$route->path, $controller, $method->name());
 
                     $routes[$definition->signature()] = isset($routes[$definition->signature()])

@@ -39,7 +39,7 @@ it('builds dependencies recursively, and falls back to null for an optional unbo
 
 it('explains which parameter cannot be resolved', function (): void {
     container()->make(Report::class);
-})->throws(UnresolvableDependency::class, 'Cannot resolve $limit of '.Report::class.'::__construct()');
+})->throws(UnresolvableDependency::class, 'Cannot resolve ['.Report::class.'::__construct($limit)]');
 
 it('refuses to build an interface without a binding', function (): void {
     container()->make(Clock::class);

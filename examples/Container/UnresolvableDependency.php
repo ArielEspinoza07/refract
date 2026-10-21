@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Refract\Examples\Container;
 
 use LogicException;
-use Refract\ReflectedMethod;
 use Refract\ReflectedParameter;
 
 final class UnresolvableDependency extends LogicException
@@ -30,11 +29,6 @@ final class UnresolvableDependency extends LogicException
 
     public static function parameter(ReflectedParameter $parameter): self
     {
-        $function = $parameter->declaringFunction();
-        $owner = $function instanceof ReflectedMethod
-            ? "{$function->declaringClass()->name()}::{$function->name()}()"
-            : "{$function->name()}()";
-
-        return new self("Cannot resolve \${$parameter->name()} of {$owner}: it has no class type, no default value, and is not nullable.");
+        return new self("Cannot resolve [{$parameter->qualifiedName()}]: it has no class type, no default value, and is not nullable.");
     }
 }
