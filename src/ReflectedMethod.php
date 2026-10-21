@@ -43,7 +43,7 @@ final readonly class ReflectedMethod implements ClassMember, FunctionLike
      */
     public static function from(string|object $class, string $method): self
     {
-        return ReflectedClass::from($class)->method($method);
+        return self::tryFrom($class, $method) ?? ReflectedClass::from($class)->method($method);
     }
 
     /**
@@ -53,13 +53,11 @@ final readonly class ReflectedMethod implements ClassMember, FunctionLike
      */
     public static function tryFrom(string|object $class, string $method): ?self
     {
-        $reflected = ReflectedClass::tryFrom($class);
-
-        if ($reflected === null || ! $reflected->hasMethod($method)) {
+        if (is_string($class) && ! class_exists($class) && ! interface_exists($class) && ! trait_exists($class)) {
             return null;
         }
 
-        return $reflected->method($method);
+        return method_exists($class, $method) ? new self(new ReflectionMethod($class, $method)) : null;
     }
 
     /**

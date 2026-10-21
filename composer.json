@@ -31,7 +31,8 @@
         "pestphp/pest": "^4.7.8",
         "phpstan/phpstan": "^2.3.1",
         "laravel/pint": "^1.32.1",
-        "pestphp/pest-plugin-type-coverage": "^4.0"
+        "pestphp/pest-plugin-type-coverage": "^4.0",
+        "phpbench/phpbench": "^1.7"
     },
     "autoload": {
         "psr-4": {
@@ -41,7 +42,8 @@
     "autoload-dev": {
         "psr-4": {
             "Refract\\Tests\\": "tests/",
-            "Refract\\Examples\\": "examples/"
+            "Refract\\Examples\\": "examples/",
+            "Refract\\Benchmarks\\": "benchmarks/"
         },
         "files": [
             "tests/Fixtures/functions.php"
@@ -55,6 +57,7 @@
         "test:coverage": "pest --coverage --min=100",
         "test:types": "pest --type-coverage --min=100",
         "test:mutate": "pest --mutate --everything --parallel --path=src --min=95",
+        "bench": "phpbench run --report=aggregate",
         "check": [
             "@lint",
             "@analyse",
