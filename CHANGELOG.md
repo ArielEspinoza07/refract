@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-10-21
+
 First release: a fluent, immutable and fully typed API for PHP's native reflection. Requires PHP 8.3 or later and has
 no runtime dependencies.
 
@@ -121,4 +123,5 @@ no runtime dependencies.
 - `ReflectedClass`: `newLazyGhost()`, `newLazyProxy()` and `isUninitializedLazyObject()`.
 - On PHP 8.3, the inspection methods return `false`, and creating a lazy object throws `FeatureNotSupported`.
 
-[Unreleased]: https://github.com/arielespinoza07/refract/commits/main
+[Unreleased]: https://github.com/arielespinoza07/refract/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/arielespinoza07/refract/releases/tag/v0.1.0
