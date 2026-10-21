@@ -31,6 +31,11 @@ final class Signatures
         return new self();
     }
 
+    public function merge(self $other): self
+    {
+        return $other;
+    }
+
     /** Sends a message. */
     public function send(#[Tag] string $to, ?string $subject = null, int &$attempts = 0, string ...$cc): bool
     {

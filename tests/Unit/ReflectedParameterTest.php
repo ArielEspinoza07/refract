@@ -61,7 +61,9 @@ describe('tryFrom()', function (): void {
     it('reflects a known parameter', function (): void {
         expect(ReflectedParameter::tryFrom(static fn (int $value): int => $value, 'value')?->name())->toBe('value')
             ->and(ReflectedParameter::tryFrom(Signatures::class.'::send', 'to')?->name())->toBe('to')
-            ->and(ReflectedParameter::tryFrom('Refract\Tests\Fixtures\greet', 0)?->name())->toBe('name');
+            ->and(ReflectedParameter::tryFrom('Refract\Tests\Fixtures\greet', 0)?->name())->toBe('name')
+            ->and(ReflectedParameter::tryFrom([Signatures::class, 'send'], 'to')?->name())->toBe('to')
+            ->and(ReflectedParameter::tryFrom([new Signatures(), 'send'], 'subject')?->name())->toBe('subject');
     });
 
     it('returns null when the function or parameter does not exist', function (mixed $function, string $parameter): void {
@@ -121,6 +123,17 @@ describe('signature details', function (): void {
 
     it('returns null when the parameter has no type', function (): void {
         expect(ReflectedParameter::from(static fn ($value) => $value, 'value')->type())->toBeNull();
+    });
+
+    it('returns the type of a plain function parameter, which has no declaring class', function (): void {
+        expect(ReflectedParameter::from('Refract\Tests\Fixtures\greet', 'name')->type()?->name())->toBe('string');
+    });
+
+    it('resolves self in a parameter type against the declaring class', function (): void {
+        $type = ReflectedParameter::from([Signatures::class, 'merge'], 'other')->type();
+
+        expect($type?->allows(new Signatures()))->toBeTrue()
+            ->and($type?->classNames())->toBe([Signatures::class]);
     });
 
     it('tells required, optional, variadic and by-reference parameters apart', function (): void {
