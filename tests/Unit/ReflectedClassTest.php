@@ -155,8 +155,7 @@ describe('hierarchy', function (): void {
         $interfaces = ReflectedClass::from(User::class)->interfaces();
 
         expect($interfaces)->toBeInstanceOf(Collection::class)
-            ->and($interfaces->names())
-            ->toContain(Identifiable::class);
+            ->and($interfaces->names())->toBe([Identifiable::class]);
     });
 
     it('lists the traits used by the class', function (): void {

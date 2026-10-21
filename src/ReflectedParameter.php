@@ -40,6 +40,7 @@ final readonly class ReflectedParameter implements HasAttributes, Named
 
     private function __construct(
         private ReflectionParameter $native,
+        private ?FunctionLike $declaringFunction = null,
     ) {}
 
     /**
@@ -93,6 +94,17 @@ final readonly class ReflectedParameter implements HasAttributes, Named
     public static function fromNative(ReflectionParameter $native): self
     {
         return new self($native);
+    }
+
+    /**
+     * Wrap a native parameter of a function or method that is already reflected, so declaringFunction()
+     * returns that reflection. Used by FunctionLike::parameters() and parameter().
+     *
+     * @internal
+     */
+    public static function ofFunction(ReflectionParameter $native, FunctionLike $function): self
+    {
+        return new self($native, $function);
     }
 
     public function native(): ReflectionParameter
@@ -161,9 +173,17 @@ final readonly class ReflectedParameter implements HasAttributes, Named
 
     /**
      * The method or function the parameter belongs to.
+     *
+     * A parameter wrapped with fromNative() reports its function the way PHP does, so a closure declared inside
+     * a class comes back as a ReflectedMethod of that class. Reflect such parameters through from(), or through
+     * ReflectedFunction::parameters(), to get the closure as a ReflectedFunction.
      */
     public function declaringFunction(): FunctionLike
     {
+        if ($this->declaringFunction !== null) {
+            return $this->declaringFunction;
+        }
+
         $function = $this->native->getDeclaringFunction();
 
         if ($function instanceof ReflectionMethod) {
@@ -278,7 +298,8 @@ final readonly class ReflectedParameter implements HasAttributes, Named
     {
         $function = $this->native->getDeclaringFunction();
         $class = $this->native->getDeclaringClass();
-        $prefix = $class === null || ! $function instanceof ReflectionMethod ? '' : "{$class->getName()}::";
+        // A declaring class means a method, or a closure declared inside that class; only methods get the prefix.
+        $prefix = $class === null || $function->isClosure() ? '' : "{$class->getName()}::";
 
         return "{$prefix}{$function->getName()}(\${$this->native->getName()})";
     }

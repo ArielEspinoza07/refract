@@ -181,6 +181,7 @@ describe('classNames()', function (): void {
         'self in a trait' => [sampleReturnType('selfReturn'), [TypeSamples::class]],
         'parent in a trait' => [sampleReturnType('parentReturn'), [Model::class]],
         'the same class twice, deduplicated' => [sampleReturnType('staticOrSelf'), [TypeSamples::class]],
+        'a duplicate before another class, reindexed' => [sampleReturnType('duplicateBeforeOther'), [TypeSamples::class, Countable::class]],
     ]);
 
     it('lists no class for parent when the scope has no parent class', function (): void {

@@ -17,6 +17,7 @@ use Refract\ReflectedParameter;
 use Refract\Tests\Fixtures\Signatures;
 use Refract\Tests\Fixtures\Table;
 use Refract\Tests\Fixtures\Tag;
+use Refract\Tests\Fixtures\TypeSamples;
 use Refract\Tests\Fixtures\User;
 
 describe('from()', function (): void {
@@ -55,13 +56,21 @@ describe('from()', function (): void {
     it('throws ParameterNotFound for an unknown parameter', function (): void {
         ReflectedParameter::from([Signatures::class, 'send'], 'missing');
     })->throws(ParameterNotFound::class);
+
+    it('splits a static call string at the first separator only', function (): void {
+        expect(ReflectedParameter::tryFrom(Signatures::class.'::send::extra', 'to'))->toBeNull()
+            ->and(static fn (): ReflectedParameter => ReflectedParameter::from(Signatures::class.'::send::extra', 'to'))
+            ->toThrow(MethodNotFound::class, 'send::extra');
+    });
 });
 
 describe('tryFrom()', function (): void {
     it('reflects a known parameter', function (): void {
         expect(ReflectedParameter::tryFrom(static fn (int $value): int => $value, 'value')?->name())->toBe('value')
             ->and(ReflectedParameter::tryFrom(Signatures::class.'::send', 'to')?->name())->toBe('to')
-            ->and(ReflectedParameter::tryFrom('Refract\Tests\Fixtures\greet', 0)?->name())->toBe('name');
+            ->and(ReflectedParameter::tryFrom('Refract\Tests\Fixtures\greet', 0)?->name())->toBe('name')
+            ->and(ReflectedParameter::tryFrom([Signatures::class, 'send'], 'to')?->name())->toBe('to')
+            ->and(ReflectedParameter::tryFrom([new Signatures(), 'send'], 'subject')?->name())->toBe('subject');
     });
 
     it('returns null when the function or parameter does not exist', function (mixed $function, string $parameter): void {
@@ -123,6 +132,17 @@ describe('signature details', function (): void {
         expect(ReflectedParameter::from(static fn ($value) => $value, 'value')->type())->toBeNull();
     });
 
+    it('returns the type of a plain function parameter, which has no declaring class', function (): void {
+        expect(ReflectedParameter::from('Refract\Tests\Fixtures\greet', 'name')->type()?->name())->toBe('string');
+    });
+
+    it('resolves self in a parameter type against the declaring class', function (): void {
+        $type = ReflectedParameter::from([Signatures::class, 'merge'], 'other')->type();
+
+        expect($type?->allows(new Signatures()))->toBeTrue()
+            ->and($type?->classNames())->toBe([Signatures::class]);
+    });
+
     it('tells required, optional, variadic and by-reference parameters apart', function (): void {
         $to = ReflectedParameter::from([Signatures::class, 'send'], 'to');
         $attempts = ReflectedParameter::from([Signatures::class, 'send'], 'attempts');
@@ -176,6 +196,48 @@ describe('declaration', function (): void {
 
         expect($parameter->declaringFunction())->toBeInstanceOf(ReflectedFunction::class)
             ->and($parameter->declaringClass())->toBeNull();
+    });
+
+    it('reflects a closure as a function, not as its __invoke() method', function (): void {
+        $closure = static fn (int $value): int => $value;
+
+        expect(ReflectedParameter::from($closure, 'value')->declaringFunction())->toBeInstanceOf(ReflectedFunction::class)
+            ->and(ReflectedParameter::tryFrom($closure, 'value')?->declaringFunction())->toBeInstanceOf(ReflectedFunction::class);
+    });
+
+    it('names a closure declared inside a class without the class prefix', function (): void {
+        $parameter = ReflectedParameter::from((new Signatures())->closureWithParameter(), 'value');
+
+        try {
+            $parameter->defaultValue();
+            $message = null;
+        } catch (DefaultValueNotAvailable $exception) {
+            $message = $exception->getMessage();
+        }
+
+        // PHP names the closure "Namespace\{closure}" before 8.4 and "{closure:...}" since, so only the
+        // class prefix a method would get is ruled out.
+        expect($parameter->declaringClass()?->name())->toBe(Signatures::class)
+            ->and($message)->toContain('{closure')
+            ->and($message)->not->toStartWith('['.Signatures::class.'::');
+    });
+
+    it('finds the declaring function or method of a parameter wrapped with fromNative()', function (): void {
+        $functionParameter = new ReflectionParameter('Refract\Tests\Fixtures\greet', 'name');
+        $methodParameter = new ReflectionParameter([Signatures::class, 'send'], 'to');
+
+        expect(ReflectedParameter::fromNative($functionParameter)->declaringFunction())->toBeInstanceOf(ReflectedFunction::class)
+            ->and(ReflectedParameter::fromNative($methodParameter)->declaringFunction())->toBeInstanceOf(ReflectedMethod::class);
+    });
+
+    it('reports a closure declared inside a class the way PHP does when wrapped with fromNative()', function (): void {
+        $native = (new ReflectionFunction((new Signatures())->closureWithParameter()))->getParameters()[0];
+
+        expect(ReflectedParameter::fromNative($native)->declaringFunction())->toBeInstanceOf(ReflectedMethod::class);
+    });
+
+    it('resolves self in a parameter declared inside a trait', function (): void {
+        expect(ReflectedParameter::from([TypeSamples::class, 'takesSelf'], 'other')->type()?->allows(new TypeSamples()))->toBeTrue();
     });
 });
 

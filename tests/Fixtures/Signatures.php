@@ -31,6 +31,11 @@ final class Signatures
         return new self();
     }
 
+    public function merge(self $other): self
+    {
+        return $other;
+    }
+
     /** Sends a message. */
     public function send(#[Tag] string $to, ?string $subject = null, int &$attempts = 0, string ...$cc): bool
     {
@@ -62,5 +67,21 @@ final class Signatures
     public function boundClosure(): Closure
     {
         return fn (): int => $this->id;
+    }
+
+    /**
+     * A closure with a parameter, declared inside this class but not a method of it.
+     */
+    public function closureWithParameter(): Closure
+    {
+        return static fn (int $value): int => $value;
+    }
+
+    /**
+     * A closure whose return type, static, can only be resolved against its class scope.
+     */
+    public function staticReturningClosure(): Closure
+    {
+        return fn (): static => $this;
     }
 }
