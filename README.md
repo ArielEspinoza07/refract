@@ -198,6 +198,8 @@ composer check
 | `composer test`          | Runs the Pest test suite                         |
 | `composer test:types`    | Enforces 100% type coverage                      |
 | `composer test:coverage` | Enforces 100% line coverage (needs Xdebug or PCOV) |
+| `composer test:mutate`   | Runs mutation testing with a 95% minimum score   |
+| `composer bench`         | Compares Refract with native reflection (PHPBench) |
 | `composer check`         | Runs lint, analyse, type coverage, and test      |
 
 ## Versioning
