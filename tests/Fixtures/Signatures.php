@@ -68,4 +68,20 @@ final class Signatures
     {
         return fn (): int => $this->id;
     }
+
+    /**
+     * A closure with a parameter, declared inside this class but not a method of it.
+     */
+    public function closureWithParameter(): Closure
+    {
+        return static fn (int $value): int => $value;
+    }
+
+    /**
+     * A closure whose return type, static, can only be resolved against its class scope.
+     */
+    public function staticReturningClosure(): Closure
+    {
+        return fn (): static => $this;
+    }
 }

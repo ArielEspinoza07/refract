@@ -22,6 +22,8 @@ trait ReturnsRelativeTypes
         return $this;
     }
 
+    public function takesSelf(self $other): void {}
+
     /**
      * Lists the same class twice before another one, since a trait keeps `self` literal and in order.
      */

@@ -30,7 +30,10 @@ trait InteractsWithFunctions
 
     public function parameters(): ParameterCollection
     {
-        return new ParameterCollection(array_map(ReflectedParameter::fromNative(...), $this->native()->getParameters()));
+        return new ParameterCollection(array_map(
+            fn (ReflectionParameter $native): ReflectedParameter => ReflectedParameter::ofFunction($native, $this),
+            $this->native()->getParameters(),
+        ));
     }
 
     public function hasParameter(string|int $parameter): bool
@@ -45,7 +48,7 @@ trait InteractsWithFunctions
     {
         $native = $this->findParameter($parameter) ?? throw ParameterNotFound::in($this->declarationName(), $parameter);
 
-        return ReflectedParameter::fromNative($native);
+        return ReflectedParameter::ofFunction($native, $this);
     }
 
     public function returnType(): ?ReflectedType
