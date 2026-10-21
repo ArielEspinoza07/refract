@@ -10,6 +10,7 @@ parameters:
     paths:
         - src
         - tests
+        - examples
 
     excludePaths:
         # Uses PHP 8.4 syntax. Still scanned, so tests can reference its classes.
