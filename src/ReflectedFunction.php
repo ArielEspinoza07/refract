@@ -137,13 +137,16 @@ final readonly class ReflectedFunction implements FunctionLike
         return $this->native->getClosure();
     }
 
+    /**
+     * The fully qualified name of the declaration, e.g. "App\Support\format()"; closures use the name PHP gives them.
+     */
+    public function qualifiedName(): string
+    {
+        return "{$this->native->getName()}()";
+    }
+
     private function typeScope(): ?string
     {
         return $this->native->getClosureScopeClass()?->getName();
-    }
-
-    private function declarationName(): string
-    {
-        return "{$this->native->getName()}()";
     }
 }

@@ -49,6 +49,11 @@ final class TypeSamples extends Model
     /** @var (Countable&Traversable<mixed>)|null */
     public (Countable&Traversable)|null $dnf = null;
 
+    public int|string|null $unionWithNull = null;
+
+    /** @var (Countable&Traversable<mixed>)|Model|null */
+    public (Countable&Traversable)|Model|null $dnfWithClass = null;
+
     public self $self;
 
     public Model $class;

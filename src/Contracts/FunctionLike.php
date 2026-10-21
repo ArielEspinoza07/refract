@@ -73,4 +73,9 @@ interface FunctionLike extends HasAttributes, Named
      * The doc comment above the declaration, including the comment markers, or null when there is none.
      */
     public function docComment(): ?string;
+
+    /**
+     * The fully qualified name, e.g. "App\Models\User::save()" or "App\Support\format()".
+     */
+    public function qualifiedName(): string;
 }

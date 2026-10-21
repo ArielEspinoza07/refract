@@ -168,7 +168,7 @@ final readonly class ReflectedParameter implements HasAttributes, Named
     {
         return $this->native->isDefaultValueAvailable()
             ? $this->native->getDefaultValue()
-            : throw DefaultValueNotAvailable::for($this->declarationName());
+            : throw DefaultValueNotAvailable::for($this->qualifiedName());
     }
 
     /**
@@ -204,6 +204,19 @@ final readonly class ReflectedParameter implements HasAttributes, Named
         $class = $this->native->getDeclaringClass();
 
         return $class === null ? null : ReflectedClass::fromNative($class);
+    }
+
+    /**
+     * The fully qualified name of the declaration, e.g. "App\Models\User::save($data)" or "App\Support\format($value)".
+     */
+    public function qualifiedName(): string
+    {
+        $function = $this->native->getDeclaringFunction();
+        $class = $this->native->getDeclaringClass();
+        // A declaring class means a method, or a closure declared inside that class; only methods get the prefix.
+        $prefix = $class === null || $function->isClosure() ? '' : "{$class->getName()}::";
+
+        return "{$prefix}{$function->getName()}(\${$this->native->getName()})";
     }
 
     /**
@@ -292,15 +305,5 @@ final readonly class ReflectedParameter implements HasAttributes, Named
     private function typeScope(): ?string
     {
         return $this->native->getDeclaringClass()?->getName();
-    }
-
-    private function declarationName(): string
-    {
-        $function = $this->native->getDeclaringFunction();
-        $class = $this->native->getDeclaringClass();
-        // A declaring class means a method, or a closure declared inside that class; only methods get the prefix.
-        $prefix = $class === null || $function->isClosure() ? '' : "{$class->getName()}::";
-
-        return "{$prefix}{$function->getName()}(\${$this->native->getName()})";
     }
 }

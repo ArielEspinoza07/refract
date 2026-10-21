@@ -115,13 +115,16 @@ final readonly class ReflectedConstant implements ClassMember
         return $value instanceof BackedEnum ? $value->value : null;
     }
 
+    /**
+     * The fully qualified name of the declaration, e.g. "App\Models\User::TABLE".
+     */
+    public function qualifiedName(): string
+    {
+        return "{$this->native->class}::{$this->native->getName()}";
+    }
+
     private function typeScope(): string
     {
         return $this->native->class;
-    }
-
-    private function declarationName(): string
-    {
-        return "{$this->native->class}::{$this->native->getName()}";
     }
 }

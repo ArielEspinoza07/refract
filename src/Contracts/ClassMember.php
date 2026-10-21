@@ -33,4 +33,9 @@ interface ClassMember extends HasAttributes, Named
      * @param  class-string  $class
      */
     public function isDeclaredBy(string $class): bool;
+
+    /**
+     * The fully qualified name, e.g. "App\Models\User::save()", "App\Models\User::$email" or "App\Models\User::TABLE".
+     */
+    public function qualifiedName(): string;
 }

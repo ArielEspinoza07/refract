@@ -69,6 +69,32 @@ final readonly class ReflectedType implements Named
     }
 
     /**
+     * The type as PHP prints it, without the part that allows null: "int" for `?int`, "string|int" for
+     * `string|int|null`, "A&B" for `(A&B)|null`. Types that cannot be split, like `mixed` and `null`, are
+     * returned unchanged. Useful to decide how to convert a value before checking it with allows().
+     */
+    public function nonNullName(): string
+    {
+        if ($this->native instanceof ReflectionNamedType) {
+            // Unlike the string form, getName() never includes the leading "?".
+            return $this->native->getName();
+        }
+
+        if (! $this->native instanceof ReflectionUnionType) {
+            return $this->name();
+        }
+
+        $members = $this->types()->reject(static fn (self $type): bool => $type->name() === 'null');
+
+        // A lone member needs no grouping; inside a union, an intersection keeps its parentheses.
+        return $members->count() === 1
+            ? ($members->first()?->name() ?? '')
+            : implode('|', $members->map(
+                static fn (self $type): string => $type->kind() === TypeKind::Intersection ? "({$type->name()})" : $type->name(),
+            ));
+    }
+
+    /**
      * Whether this is a single built-in type like `int` or `mixed`, as opposed to a class or a composite type.
      */
     public function isBuiltin(): bool

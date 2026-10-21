@@ -84,6 +84,7 @@ $class->implements(Arrayable::class);
 $class->methods()->public()->declaredBy(User::class)->names();   // ['save', 'delete', ...]
 $class->properties()->promoted()->readonly();
 $class->attribute(Table::class)->newInstance()->name;
+$class->attributeInstances(Route::class);      // list<Route>: every #[Route], created and typed
 
 $user = $class->newInstance(email: 'ada@example.com');   // typed as User for PHPStan
 ```
@@ -134,6 +135,7 @@ $type->kind();        // TypeKind::Union
 $type->name();        // 'int|float'
 $type->types();       // a collection of the member types
 $type->allows(9.99);  // true: checked the way PHP does with strict_types=1
+$type->nonNullName(); // 'int|float' for int|float|null, 'int' for ?int
 
 // The classes a type accepts, e.g. for dependency injection: ?Logger, (A&B)|C, static...
 ReflectedParameter::from([UserController::class, '__construct'], 'logger')->type()?->classNames();   // ['Psr\Log\LoggerInterface']

@@ -162,7 +162,10 @@ final readonly class ReflectedEnum implements HasAttributes, Named
         return ReflectedClass::fromNative($this->native);
     }
 
-    private function declarationName(): string
+    /**
+     * The fully qualified name of the declaration, the same as name(), e.g. "App\Enums\Status".
+     */
+    public function qualifiedName(): string
     {
         return $this->name();
     }
