@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   quality:
-    name: Quality (Pint, PHPStan, type coverage)
+    name: Quality (Pint, PHPStan, type and line coverage)
     runs-on: ubuntu-latest
 
     steps:
@@ -24,9 +24,10 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          # Lowest supported version, so PHPStan flags APIs that don't exist on 8.3.
-          php-version: '8.3'
-          coverage: none
+          # Newest version, so line coverage includes code paths for PHP 8.4+ features.
+          # PHPStan still checks against 8.3 through phpVersion in phpstan.neon.
+          php-version: '8.5'
+          coverage: pcov
 
       - name: Validate composer.json
         run: composer validate --strict
@@ -39,8 +40,8 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
-          key: quality-php-8.3-${{ hashFiles('composer.json') }}
-          restore-keys: quality-php-8.3-
+          key: quality-php-8.5-${{ hashFiles('composer.json') }}
+          restore-keys: quality-php-8.5-
 
       - name: Install dependencies
         run: composer update --prefer-stable --no-interaction --prefer-dist
@@ -52,6 +53,9 @@ jobs:
         run: composer analyse
 
       - name: Type coverage
+        run: composer test:types
+
+      - name: Line coverage
         run: composer test:coverage
 
   tests:
@@ -90,3 +94,21 @@ jobs:
 
       - name: Run tests
         run: composer test
+
+  # A single check for branch protection to require, so changing the PHP versions in the
+  # matrix above never renames a required check.
+  tests-passed:
+    name: Tests passed
+    needs: tests
+    # Run even when a test combination fails; otherwise this job is skipped, and a skipped
+    # required check can count as passing.
+    if: always()
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Fail unless every test combination passed
+        env:
+          RESULT: ${{ needs.tests.result }}
+        run: |
+          echo "Test matrix result: $RESULT"
+          test "$RESULT" = "success"
