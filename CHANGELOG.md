@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-23
+
 ### Added
 
 - `ReflectedCallable::from()` and `tryFrom()` reflect any callable as the `ReflectedFunction` or `ReflectedMethod` it
@@ -137,5 +139,6 @@ no runtime dependencies.
 - `ReflectedClass`: `newLazyGhost()`, `newLazyProxy()` and `isUninitializedLazyObject()`.
 - On PHP 8.3, the inspection methods return `false`, and creating a lazy object throws `FeatureNotSupported`.
 
-[Unreleased]: https://github.com/arielespinoza07/refract/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/arielespinoza07/refract/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/arielespinoza07/refract/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/arielespinoza07/refract/releases/tag/v0.1.0
