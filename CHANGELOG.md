@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `ReflectedCallable::from()` and `tryFrom()` reflect any callable as the `ReflectedFunction` or `ReflectedMethod` it
   refers to: a closure, a function name, `"Class::method"`, `[$classOrObject, 'method']` or an invokable object.
   First-class callables such as `$user->save(...)` resolve to the method they were created from.
+- Reference documentation in [`docs/`](docs/README.md), describing every public method, exception and PHP 8.4 fallback.
 
 ### Changed
 

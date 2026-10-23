@@ -66,6 +66,8 @@ Every type can be used on its own, and offers the same entry points:
 
 `native()` always returns the underlying native object.
 
+The sections below are a tour. Every public method is described in the [reference documentation](docs/README.md).
+
 For complete, runnable code, see the [`examples/`](examples) folder (in the repository, not the installed package):
 
 - [`router.php`](examples/router.php): builds a route table from `#[Route]` attributes on controllers, adds closure
