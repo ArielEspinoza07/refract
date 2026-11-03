@@ -86,6 +86,6 @@ ReflectedParameter::collectFrom($handler)->required();
 
 A parameter reached through `from()` or a `FunctionLike` remembers its function, so a closure declared inside a class
 is a `ReflectedFunction`. Wrapped directly with `fromNative()`, it is reported the way PHP reports it: as a method of
-that class.
+that class, unless the function is passed as well: `ReflectedParameter::fromNative($native, $function)`.
 
 Parameters have attributes too, see [Attributes](attributes.md).

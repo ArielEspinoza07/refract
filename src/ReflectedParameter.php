@@ -89,21 +89,14 @@ final readonly class ReflectedParameter implements HasAttributes, Named
 
     /**
      * Wrap an existing native reflection.
-     */
-    public static function fromNative(ReflectionParameter $native): self
-    {
-        return new self($native);
-    }
-
-    /**
-     * Wrap a native parameter of a function or method that is already reflected, so declaringFunction()
-     * returns that reflection. Used by FunctionLike::parameters() and parameter().
      *
-     * @internal
+     * @param  FunctionLike|null  $declaringFunction  The already reflected function or method the parameter belongs to,
+     *                                               returned as is by declaringFunction(). Without it, the function is
+     *                                               reported the way PHP reports it.
      */
-    public static function ofFunction(ReflectionParameter $native, FunctionLike $function): self
+    public static function fromNative(ReflectionParameter $native, ?FunctionLike $declaringFunction = null): self
     {
-        return new self($native, $function);
+        return new self($native, $declaringFunction);
     }
 
     public function native(): ReflectionParameter

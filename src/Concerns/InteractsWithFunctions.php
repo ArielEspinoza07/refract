@@ -31,7 +31,7 @@ trait InteractsWithFunctions
     public function parameters(): ParameterCollection
     {
         return new ParameterCollection(array_map(
-            fn (ReflectionParameter $native): ReflectedParameter => ReflectedParameter::ofFunction($native, $this),
+            fn (ReflectionParameter $native): ReflectedParameter => ReflectedParameter::fromNative($native, $this),
             $this->native()->getParameters(),
         ));
     }
@@ -48,7 +48,7 @@ trait InteractsWithFunctions
     {
         $native = $this->findParameter($parameter) ?? throw ParameterNotFound::in($this->qualifiedName(), $parameter);
 
-        return ReflectedParameter::ofFunction($native, $this);
+        return ReflectedParameter::fromNative($native, $this);
     }
 
     public function returnType(): ?ReflectedType
