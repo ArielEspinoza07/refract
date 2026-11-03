@@ -13,6 +13,7 @@ use Refract\ReflectedClass;
 use Refract\ReflectedMethod;
 use Refract\ReflectedProperty;
 use Refract\Tests\Fixtures\Article;
+use Refract\Tests\Fixtures\HasTimestamps;
 use Refract\Tests\Fixtures\TypeSamples;
 use Refract\Tests\Fixtures\User;
 
@@ -51,6 +52,26 @@ describe('tryFrom()', function (): void {
     it('returns null for an unknown property', function (): void {
         expect(ReflectedProperty::tryFrom(User::class, 'missing'))->toBeNull();
     });
+
+    it('finds the same properties as native reflection', function (object|string $class, string $property, bool $found): void {
+        /** @var class-string|object $class */
+        $native = is_object($class) ? new ReflectionObject($class) : new ReflectionClass($class);
+
+        expect(ReflectedProperty::tryFrom($class, $property) !== null)->toBe($found)
+            ->and($native->hasProperty($property))->toBe($found);
+    })->with([
+        'declared' => [User::class, 'email', true],
+        'inherited and protected' => [User::class, 'key', true],
+        'from a trait' => [User::class, 'touchedAt', true],
+        'on the trait itself' => [HasTimestamps::class, 'touchedAt', true],
+        'promoted' => [Article::class, 'slug', true],
+        'static' => [Article::class, 'published', true],
+        'private, on its own class' => [Article::class, 'views', true],
+        'private, declared by the parent' => [fn (): Article => new class ('slug', 'Title') extends Article {}, 'views', false],
+        'dynamic, by instance' => [fn (): stdClass => (object) ['extra' => 1], 'extra', true],
+        'dynamic, by class name' => [stdClass::class, 'extra', false],
+        'unknown' => [User::class, 'missing', false],
+    ]);
 });
 
 describe('collectFrom()', function (): void {
@@ -59,11 +80,11 @@ describe('collectFrom()', function (): void {
 
         expect($properties)->toBeInstanceOf(PropertyCollection::class)
             ->and($properties->names())
-            ->toEqualCanonicalizing(['email', 'key']);
+            ->toEqualCanonicalizing(['email', 'key', 'touchedAt']);
     });
 
     it('reflects the properties of an instance', function (): void {
-        expect(ReflectedProperty::collectFrom(new User('ada@example.com'))->count())->toBe(2);
+        expect(ReflectedProperty::collectFrom(new User('ada@example.com'))->count())->toBe(3);
     });
 
     it('throws ClassNotFound for an unknown class name', function (): void {

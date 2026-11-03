@@ -6,5 +6,10 @@ namespace Refract\Tests\Fixtures;
 
 trait HasTimestamps
 {
-    public function touch(): void {}
+    public ?int $touchedAt = null;
+
+    public function touch(): void
+    {
+        $this->touchedAt = time();
+    }
 }

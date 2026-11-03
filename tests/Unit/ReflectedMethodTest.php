@@ -13,6 +13,7 @@ use Refract\Exceptions\ParameterNotFound;
 use Refract\ReflectedMethod;
 use Refract\ReflectedProperty;
 use Refract\Tests\Fixtures\Article;
+use Refract\Tests\Fixtures\HasTimestamps;
 use Refract\Tests\Fixtures\Identifiable;
 use Refract\Tests\Fixtures\Model;
 use Refract\Tests\Fixtures\Signatures;
@@ -53,6 +54,11 @@ describe('tryFrom()', function (): void {
 
     it('returns null for an unknown method', function (): void {
         expect(ReflectedMethod::tryFrom(User::class, 'missing'))->toBeNull();
+    });
+
+    it('reflects a method by interface or trait name', function (): void {
+        expect(ReflectedMethod::tryFrom(Identifiable::class, 'id')?->qualifiedName())->toBe(Identifiable::class.'::id()')
+            ->and(ReflectedMethod::tryFrom(HasTimestamps::class, 'touch')?->qualifiedName())->toBe(HasTimestamps::class.'::touch()');
     });
 });
 

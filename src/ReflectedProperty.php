@@ -45,7 +45,7 @@ final readonly class ReflectedProperty implements ClassMember
      */
     public static function from(string|object $class, string $property): self
     {
-        return ReflectedClass::from($class)->property($property);
+        return self::tryFrom($class, $property) ?? ReflectedClass::from($class)->property($property);
     }
 
     /**
@@ -55,13 +55,11 @@ final readonly class ReflectedProperty implements ClassMember
      */
     public static function tryFrom(string|object $class, string $property): ?self
     {
-        $reflected = ReflectedClass::tryFrom($class);
-
-        if ($reflected === null || ! $reflected->hasProperty($property)) {
+        if (is_string($class) && ! class_exists($class) && ! interface_exists($class) && ! trait_exists($class)) {
             return null;
         }
 
-        return $reflected->property($property);
+        return property_exists($class, $property) ? new self(new ReflectionProperty($class, $property)) : null;
     }
 
     /**
