@@ -10,8 +10,8 @@ use Refract\ReflectedParameter;
 use Refract\Tests\Fixtures\Signatures;
 
 /**
- * One parameter of a [class, method] callable. Refract resolves the callable form and validates
- * the array shape first, then goes through the class and the method.
+ * One parameter of a [class, method] callable. Native builds that one parameter; Refract resolves the
+ * callable through ReflectedCallable, wraps the method, then finds the parameter among all of them.
  */
 #[Bench\Groups(['callable-parameter'])]
 final class CallableParameterBench

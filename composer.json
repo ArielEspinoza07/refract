@@ -58,6 +58,8 @@
         "test:types": "pest --type-coverage --min=100",
         "test:mutate": "pest --mutate --everything --parallel --path=src --min=95",
         "bench": "phpbench run --report=aggregate",
+        "bench:baseline": "phpbench run --report=aggregate --tag=baseline",
+        "bench:compare": "phpbench run --report=aggregate --ref=baseline",
         "check": [
             "@lint",
             "@analyse",

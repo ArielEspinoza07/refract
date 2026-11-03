@@ -35,10 +35,14 @@ Every PR must pass the same checks CI runs:
 | `composer test:coverage`| Enforces 100% line coverage (needs Xdebug or PCOV; with Xdebug, set `XDEBUG_MODE=coverage`) |
 | `composer test:mutate`  | Runs mutation testing and enforces a 95% score (needs Xdebug or PCOV; takes a few minutes) |
 | `composer bench`        | Compares Refract with native reflection using PHPBench; Xdebug is switched off for the measured runs |
+| `composer bench:baseline` | Runs the benchmarks and stores the results as the baseline |
+| `composer bench:compare`  | Runs the benchmarks and shows the difference from the stored baseline |
 | `composer check`        | Runs lint, analyse, type coverage, and test in sequence |
 
-Run `composer bench` before and after a change that could affect performance, and include both results in the
-pull request.
+For a change that could affect performance, run `composer bench:baseline` on `main`, then `composer bench:compare`
+on your branch, and include the comparison in the pull request. Run both on the same machine, with nothing else
+heavy running. Iterations are retried until they agree within 5%, so a full run takes about a minute, and
+differences below about 5% between two runs are noise.
 
 Run `composer check` before pushing. CI also runs the test suite on PHP 8.3, 8.4, and 8.5 with both lowest and
 stable dependencies, so avoid language features or functions that don't exist on 8.3.
