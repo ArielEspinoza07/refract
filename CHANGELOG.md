@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Faster `ReflectedProperty::from()` and `tryFrom()`: they no longer build the class reflection first.
+
 ## [0.2.0] - 2026-10-23
 
 ### Added

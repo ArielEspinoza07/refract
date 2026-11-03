@@ -305,7 +305,7 @@ describe('member collections', function (): void {
 
         expect($properties)->toBeInstanceOf(PropertyCollection::class)
             ->and($properties->names())
-            ->toEqualCanonicalizing(['email', 'key']);
+            ->toEqualCanonicalizing(['email', 'key', 'touchedAt']);
     });
 
     it('lists all constants, including inherited ones', function (): void {
