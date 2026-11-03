@@ -6,7 +6,8 @@
     "runner.php_config": {
         "xdebug.mode": "off"
     },
-    "runner.revs": 2000,
-    "runner.iterations": 5,
-    "runner.warmup": 2
+    "runner.revs": 10000,
+    "runner.iterations": 10,
+    "runner.warmup": 2,
+    "runner.retry_threshold": 5
 }

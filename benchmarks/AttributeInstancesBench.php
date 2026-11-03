@@ -12,8 +12,8 @@ use Refract\Tests\Fixtures\Article;
 use Refract\Tests\Fixtures\Label;
 
 /**
- * Creating the attribute objects of a method. Refract also builds the declaring class reflection,
- * because ReflectedMethod::from() goes through ReflectedClass.
+ * Creating the attribute objects of a method. Refract adds the method wrapper and the attribute wrappers
+ * around the native objects.
  */
 #[Bench\Groups(['attribute-instances'])]
 final class AttributeInstancesBench
