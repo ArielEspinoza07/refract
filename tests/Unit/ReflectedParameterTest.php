@@ -243,6 +243,13 @@ describe('declaration', function (): void {
         expect(ReflectedParameter::fromNative($native)->declaringFunction())->toBeInstanceOf(ReflectedMethod::class);
     });
 
+    it('returns the declaring function given to fromNative()', function (): void {
+        $function = ReflectedFunction::from((new Signatures())->closureWithParameter());
+        $native = $function->native()->getParameters()[0];
+
+        expect(ReflectedParameter::fromNative($native, $function)->declaringFunction())->toBe($function);
+    });
+
     it('resolves self in a parameter declared inside a trait', function (): void {
         expect(ReflectedParameter::from([TypeSamples::class, 'takesSelf'], 'other')->type()?->allows(new TypeSamples()))->toBeTrue();
     });

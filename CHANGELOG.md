@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `ReflectedParameter::fromNative()` accepts the declaring function as an optional second argument, returned as is by
+  `declaringFunction()`. It replaces the internal `ReflectedParameter::ofFunction()`.
+
 ### Changed
 
 - Faster `ReflectedProperty::from()` and `tryFrom()`: they no longer build the class reflection first.
